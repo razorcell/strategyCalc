@@ -12,7 +12,8 @@ let wins = 0;
 let losses = 0;
 let risk_in_usd = 0;
 let target_ratio = 2;
-let csv_array = [];
+let csv_array = new Array();
+let position_net = 0;
 
 for (trial = 0; trial < 100; trial++) {
   let outcome = getOucomeWithProba();
@@ -24,27 +25,31 @@ for (trial = 0; trial < 100; trial++) {
     case "WIN":
       wins++;
       balance += risk_in_usd * target_ratio;
-      console.log(
-        `Trial : ${trial} | Outcome : ${outcome} | Balance : ${balance} | 0.5% : ${risk_in_usd} | +${risk_in_usd *
-          target_ratio}`
-      );
+      position_net = +$risk_in_usd * target_ratio;
+      // console.log(
+      //   `Trial : ${trial} | Outcome : ${outcome} | Balance : ${balance} | 0.5% : ${risk_in_usd} | +${risk_in_usd *
+      //     target_ratio}`
+      // );
       break;
     case "LOSS":
       losses++;
       balance -= risk_in_usd;
-      console.log(
-        `Trial : ${trial} | Outcome : ${outcome} | Balance : ${balance} | 0.5% : ${risk_in_usd} | -${risk_in_usd}`
-      );
+      // console.log(
+      //   `Trial : ${trial} | Outcome : ${outcome} | Balance : ${balance} | 0.5% : ${risk_in_usd} | -${risk_in_usd}`
+      // );
       break;
   }
   csv_array = csv_array.concat({
     trial: trial,
     outcome: outcome,
     balance: balance,
-    risk_in_usd: risk_in_usd
+    risk_in_usd: risk_in_usd,
+    net : 
   });
 }
 console.log(`WINS = ${wins} - LOSSES = ${losses}`);
+
+console.log(csv_array);
 
 saveToCSV(csv_array);
 
@@ -54,7 +59,7 @@ saveToCSV(csv_array);
 // }
 
 function getOucomeWithProba() {
-  var weights = [0.7, 0.3]; // probabilities
+  var weights = [0.4, 0.6]; // probabilities
   var results = ["WIN", "LOSS"]; // values to return
   var num = Math.random(),
     s = 0,
@@ -81,5 +86,5 @@ function saveToCSV(csv_array) {
   console.log(`Saving to file : ${full_file_path}`);
   const ws = fs.createWriteStream(full_file_path);
   //Write the CSV file and return it to the user as a download attachement
-  fastcsv.write(csv_array, { headers: true });
+  fastcsv.write(csv_array, { headers: true }).pipe(ws);
 }
